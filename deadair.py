@@ -1,3 +1,15 @@
+cloud_name = os.getenv("CLOUDINARY_CLOUD")
+api_key = os.getenv("CLOUDINARY_KEY")
+api_secret = os.getenv("CLOUDINARY_SECRET")
+
+if not all([cloud_name, api_key, api_secret]):
+    raise ValueError("Missing Cloudinary configuration environment variables")
+
+cloudinary.config(
+    cloud_name=cloud_name,
+    api_key=api_key,
+    api_secret=api_secret
+)
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
