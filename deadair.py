@@ -1,33 +1,28 @@
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
+import cloudinary
+import cloudinary.uploader
+import os
 
-app = FastAPI()
-
-# CORS middleware to allow all origins (for local development)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+# Configure Cloudinary
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD"),
+    api_key=os.getenv("CLOUDINARY_KEY"),
+    api_secret=os.getenv("CLOUDINARY_SECRET")
 )
+from fastapi import Form
+from fastapi.responses import JSONResponse
+from TTS.api import TTS
 
-# Mount static directory for serving CSS
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Set the templates directory
-templates = Jinja2Templates(directory="templates")
-
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+# Load TTS model (do this once)
+tts = TTS(model_name="tts_models/en/ljspeech/tacotron2-DDC", progress_bar=False, gpu=False)
 
 @app.post("/narrate")
 async def narrate(text: str = Form(...), voice_style: str = Form(...)):
-    # Simulate TTS processing
-    print(f"Text received: {text}")
-    print(f"Voice style selected: {voice_style}")
-    return JSONResponse(content={"message": f"Narration (simulated) for voice style: {voice_style}"})
+    # Generate temp audio file
+    temp_file = "temp.wav"
+    tts.tts_to_file(text=text, file_path=temp_file)
+
+    # Upload to Cloudinary
+    upload_result = cloudinary.uploader.upload(temp_file, resource_type="video")
+    audio_url = upload_result["secure_url"]
+
+    return JSONResponse(content={"audio_url": audio_url})
