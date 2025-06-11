@@ -1,27 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>DeadAir.ai - Free Unlimited AI Narration</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8">
+  <title>DeadAir Narration</title>
+  <style>
+    body {
+      background-color: #0a0a0a;
+      color: #eee;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    textarea {
+      width: 90%;
+      max-width: 600px;
+      height: 150px;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background-color: #111;
+      color: #eee;
+      border: 1px solid #333;
+      resize: vertical;
+    }
+
+    button {
+      padding: 0.6rem 1.5rem;
+      background-color: #1a1a1a;
+      color: #eee;
+      border: 1px solid #333;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #333;
+    }
+
+    #audioPlayer {
+      margin-top: 1.5rem;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to DeadAir.ai</h1>
-        <p>Free, unlimited AI narration with realistic voices.</p>
-        <form action="/narrate" method="post" enctype="multipart/form-data">
-            <textarea name="text" rows="10" cols="50" placeholder="Enter your story or script here..."></textarea><br>
-            <select name="voice_style">
-                <option value="calm">Calm</option>
-                <option value="horror">Horror</option>
-                <option value="narrative">Narrative</option>
-                <option value="truecrime">True Crime</option>
-                <option value="dramatic">Dramatic</option>
-                <option value="comedic">Comedic</option>
-                <option value="neutral">Neutral</option>
-            </select><br>
-            <button type="submit">Narrate</button>
-        </form>
-    </div>
+  <h1>🎤 DeadAir Narration</h1>
+  <form id="narrateForm">
+    <textarea name="text" placeholder="Enter text to narrate..." required></textarea>
+    <input type="hidden" name="voice_style" value="calm">
+    <br>
+    <button type="submit">Narrate</button>
+  </form>
+
+  <audio id="audioPlayer" controls></audio>
+
+  <script>
+    const form = document.getElementById('narrateForm');
+    const audioPlayer = document.getElementById('audioPlayer');
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch('/narrate', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.audio_url) {
+          audioPlayer.src = data.audio_url;
+          audioPlayer.style.display = 'block';
+          audioPlayer.play();
+        } else {
+          alert('Narration failed.');
+        }
+      } catch (err) {
+        alert('An error occurred. Try again.');
+        console.error(err);
+      }
+    };
+  </script>
 </body>
 </html>
