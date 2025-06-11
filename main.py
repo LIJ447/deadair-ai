@@ -13,7 +13,6 @@ cloud_name = os.getenv("CLOUDINARY_CLOUD")
 api_key = os.getenv("CLOUDINARY_KEY")
 api_secret = os.getenv("CLOUDINARY_SECRET")
 eleven_api_key = os.getenv("ELEVEN_API_KEY")
-voice_id = "EXAVITQu4vr4xnSDxMaL"
 
 if not all([cloud_name, api_key, api_secret, eleven_api_key]):
     raise ValueError("Missing one or more required API environment variables.")
@@ -45,7 +44,11 @@ async def home(request: Request):
 
 # Narration route
 @app.post("/narrate")
-async def narrate(text: str = Form(...), voice_style: str = Form(...)):
+async def narrate(
+    text: str = Form(...),
+    voice_style: str = Form(...),
+    voice: str = Form(...)
+):
     try:
         headers = {
             "xi-api-key": eleven_api_key,
@@ -61,7 +64,7 @@ async def narrate(text: str = Form(...), voice_style: str = Form(...)):
         }
 
         tts_response = requests.post(
-            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
+            f"https://api.elevenlabs.io/v1/text-to-speech/{voice}",
             headers=headers,
             json=payload
         )

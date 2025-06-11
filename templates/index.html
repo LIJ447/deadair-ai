@@ -16,16 +16,14 @@
       margin: 0;
     }
 
-    textarea {
+    textarea, select {
       width: 90%;
       max-width: 600px;
-      height: 150px;
       margin-bottom: 1rem;
       padding: 1rem;
       background-color: #111;
       color: #eee;
       border: 1px solid #333;
-      resize: vertical;
     }
 
     button {
@@ -44,14 +42,37 @@
       margin-top: 1.5rem;
       display: none;
     }
+
+    label {
+      display: block;
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
 <body>
   <h1>🎤 DeadAir Narration</h1>
   <form id="narrateForm">
     <textarea name="text" placeholder="Enter text to narrate..." required></textarea>
-    <input type="hidden" name="voice_style" value="calm">
-    <br>
+
+    <label for="voiceSelect">Voice:</label>
+    <select name="voice" id="voiceSelect">
+      <option value="EXAVITQu4vr4xnSDxMaL">Default (Rachel)</option>
+      <option value="MF3mGyEYCl7XYWbV9V6O">Male (Antoni)</option>
+      <option value="TxGEqnHWrfWFTfGW9XjX">Calm (Bella)</option>
+      <option value="ErXwobaYiN019PkySvjV">Deep (Josh)</option>
+      <option value="21m00Tcm4TlvDq8ikWAM">Narrator (Clyde)</option>
+    </select>
+
+    <label for="styleSelect">Style:</label>
+    <select name="voice_style" id="styleSelect">
+      <option value="calm">Calm</option>
+      <option value="narrative">Narrative</option>
+      <option value="dramatic">Dramatic</option>
+      <option value="creepy">Creepy</option>
+      <option value="sarcastic">Sarcastic</option>
+    </select>
+
+    <br><br>
     <button type="submit">Narrate</button>
   </form>
 
