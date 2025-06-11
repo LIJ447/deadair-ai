@@ -1,0 +1,29 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #111;
+    color: #eee;
+    margin: 0;
+    padding: 2em;
+}
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #222;
+    padding: 2em;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #000;
+}
+textarea {
+    width: 100%;
+    background: #333;
+    color: #fff;
+    border: 1px solid #444;
+}
+select, button {
+    margin-top: 1em;
+    padding: 0.5em;
+    background: #555;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+}
