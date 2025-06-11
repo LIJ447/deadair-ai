@@ -38,28 +38,43 @@ async def home(request: Request):
 
 @app.post("/narrate")
 async def narrate(text: str = Form(...), voice_style: str = Form(...)):
-    headers = {
-        "xi-api-key": ELEVEN_API_KEY,
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "text": text,
-        "voice_settings": {
-            "stability": 0.4,
-            "similarity_boost": 0.75
+    try:
+        print(f"[CHAR COUNT] Narration request: {len(text)} characters")
+
+        headers = {
+            "xi-api-key": ELEVEN_API_KEY,
+            "Content-Type": "application/json"
         }
-    }
-    response = requests.post(
-        f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}",
-        headers=headers,
-        json=payload
-    )
 
-    temp_file = "temp.mp3"
-    with open(temp_file, "wb") as f:
-        f.write(response.content)
+        payload = {
+            "text": text,
+            "voice_settings": {
+                "stability": 0.4,
+                "similarity_boost": 0.75
+            }
+        }
 
-    upload_result = cloudinary.uploader.upload(temp_file, resource_type="video")
-    audio_url = upload_result["secure_url"]
+        response = requests.post(
+            f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}",
+            headers=headers,
+            json=payload
+        )
 
-    return JSONResponse(content={"audio_url": audio_url})
+        print("ElevenLabs Status:", response.status_code)
+        print("ElevenLabs Response:", response.text)
+
+        if response.status_code != 200:
+            return JSONResponse(
+                content={"error": "Narration failed", "details": response.text},
+                status_code=500
+            )
+
+        with open("temp.mp3", "wb") as f:
+            f.write(response.content)
+
+        upload_result = cloudinary.uploader.upload("temp.mp3", resource_type="video")
+        return JSONResponse(content={"audio_url": upload_result["secure_url"]})
+
+    except Exception as e:
+        print("Narration exception:", str(e))
+        return JSONResponse(content={"error": "Unexpected error", "details": str(e)}, status_code=500)
