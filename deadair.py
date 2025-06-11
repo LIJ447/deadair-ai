@@ -1,3 +1,4 @@
+import os
 cloud_name = os.getenv("CLOUDINARY_CLOUD")
 api_key = os.getenv("CLOUDINARY_KEY")
 api_secret = os.getenv("CLOUDINARY_SECRET")
