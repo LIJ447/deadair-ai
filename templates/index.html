@@ -74,38 +74,83 @@
 
     <br><br>
     <button type="submit">Narrate</button>
-  </form>
+ <form id="narrateForm">
+  <textarea name="text" placeholder="Enter text to narrate..." required></textarea>
 
-  <audio id="audioPlayer" controls></audio>
+  <label for="styleSelect">Style:</label>
+  <select name="voice_style" id="styleSelect" required>
+    <option value="">-- Select Style --</option>
+    <option value="calm">Calm</option>
+    <option value="narrative">Narrative</option>
+    <option value="dramatic">Dramatic</option>
+    <option value="creepy">Creepy</option>
+    <option value="sarcastic">Sarcastic</option>
+    <option value="bedtime">Bedtime</option>
+    <option value="truecrime">True Crime</option>
+    <option value="psychological">Psychological</option>
+  </select>
 
-  <script>
-    const form = document.getElementById('narrateForm');
-    const audioPlayer = document.getElementById('audioPlayer');
+  <label for="voiceSelect">Voice:</label>
+  <select name="voice_name" id="voiceSelect" required>
+    <option value="">-- Select Voice --</option>
+  </select>
 
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
+  <br><br>
+  <button type="submit">Narrate</button>
+</form>
 
-      try {
-        const response = await fetch('/narrate', {
-          method: 'POST',
-          body: formData
-        });
+<audio id="audioPlayer" controls style="display:none; margin-top:1rem;"></audio>
 
-        const data = await response.json();
+<script>
+  const voiceMap = {
+    "Rachel": ["calm", "narrative"],
+    "Antoni": ["sarcastic", "narrative"],
+    "Bella": ["calm", "bedtime"],
+    "Josh": ["creepy", "dramatic"],
+    "Clyde": ["truecrime", "psychological"]
+  };
 
-        if (data.audio_url) {
-          audioPlayer.src = data.audio_url;
-          audioPlayer.style.display = 'block';
-          audioPlayer.play();
-        } else {
-          alert('Narration failed.');
-        }
-      } catch (err) {
-        alert('An error occurred. Try again.');
-        console.error(err);
+  const form = document.getElementById('narrateForm');
+  const styleSelect = document.getElementById('styleSelect');
+  const voiceSelect = document.getElementById('voiceSelect');
+  const audioPlayer = document.getElementById('audioPlayer');
+
+  styleSelect.onchange = () => {
+    const selectedStyle = styleSelect.value;
+    voiceSelect.innerHTML = `<option value="">-- Select Voice --</option>`;
+    for (const [voice, styles] of Object.entries(voiceMap)) {
+      if (styles.includes(selectedStyle)) {
+        const option = document.createElement("option");
+        option.value = voice;
+        option.textContent = voice;
+        voiceSelect.appendChild(option);
       }
-    };
-  </script>
-</body>
-</html>
+    }
+  };
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('/narrate', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.audio_url) {
+        audioPlayer.src = data.audio_url;
+        audioPlayer.style.display = 'block';
+        audioPlayer.play();
+      } else {
+        alert('Narration failed.');
+      }
+    } catch (err) {
+      alert('An error occurred. Try again.');
+      console.error(err);
+    }
+  };
+</script>
+

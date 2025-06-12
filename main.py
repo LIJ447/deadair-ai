@@ -42,16 +42,32 @@ templates = Jinja2Templates(directory="templates")
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+
 # Narration route
+# Voice registry for ElevenLabs
+VOICE_OPTIONS = {
+    "Rachel": {"id": "EXAVITQu4vr4xnSDxMaL", "styles": ["calm", "narrative"]},
+    "Antoni": {"id": "MF3mGyEYCl7XYWbV9V6O", "styles": ["sarcastic", "narrative"]},
+    "Bella": {"id": "TxGEqnHWrfWFTfGW9XjX", "styles": ["calm", "bedtime"]},
+    "Josh": {"id": "ErXwobaYiN019PkySvjV", "styles": ["creepy", "dramatic"]},
+    "Clyde": {"id": "21m00Tcm4TlvDq8ikWAM", "styles": ["truecrime", "psychological"]},
+}
+
 @app.post("/narrate")
 async def narrate(
     text: str = Form(...),
-    voice_style: str = Form(...),
-    voice: str = Form(...)
+    voice_name: str = Form(...),
+    voice_style: str = Form(...)
 ):
     try:
+        voice_info = VOICE_OPTIONS.get(voice_name)
+        if not voice_info:
+            return JSONResponse(status_code=400, content={"error": "Invalid voice"})
+
+        voice_id = voice_info["id"]
+
         headers = {
-            "xi-api-key": eleven_api_key,
+            "xi-api-key": ELEVEN_API_KEY,
             "Content-Type": "application/json"
         }
 
@@ -64,7 +80,7 @@ async def narrate(
         }
 
         tts_response = requests.post(
-            f"https://api.elevenlabs.io/v1/text-to-speech/{voice}",
+            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
             headers=headers,
             json=payload
         )
@@ -79,9 +95,7 @@ async def narrate(
             f.write(tts_response.content)
 
         upload_result = cloudinary.uploader.upload("temp.mp3", resource_type="video")
-        audio_url = upload_result["secure_url"]
-
-        return JSONResponse(content={"audio_url": audio_url})
+        return JSONResponse(content={"audio_url": upload_result["secure_url"]})
 
     except Exception as e:
         return JSONResponse(
